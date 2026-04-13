@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "paths": {
+      "@facturaya/core": ["../core/src/index.ts"],
+      "@facturaya/signer": ["../signer/src/index.ts"],
+      "@facturaya/sri-client": ["../sri-client/src/index.ts"]
+    }
+  },
+  "include": ["src"]
+}

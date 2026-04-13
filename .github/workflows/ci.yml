@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  check:
+    name: Typecheck / Test / Build / Pack
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18, 20, 22]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Gate 1: Typecheck
+      - name: Typecheck core
+        run: npx tsc --project packages/core/tsconfig.json --noEmit
+
+      - name: Typecheck signer
+        run: npx tsc --project packages/signer/tsconfig.json
+
+      - name: Typecheck sri-client
+        run: npx tsc --project packages/sri-client/tsconfig.json
+
+      - name: Typecheck sdk
+        run: npx tsc --project packages/sdk/tsconfig.json
+
+      # Gate 2: Unit tests
+      - name: Run tests
+        run: npx vitest run
+
+      # Gate 3: Build
+      - name: Build core
+        run: cd packages/core && npx tsup
+
+      - name: Build signer
+        run: cd packages/signer && npx tsup
+
+      - name: Build sri-client
+        run: cd packages/sri-client && npx tsup
+
+      - name: Build sdk
+        run: cd packages/sdk && npx tsup
+
+      # Gate 4: Pack (validate tarballs are producible)
+      - name: Pack all packages
+        run: |
+          mkdir -p .tmp-packs
+          cd packages/core && pnpm pack --pack-destination ../../.tmp-packs
+          cd ../signer && pnpm pack --pack-destination ../../.tmp-packs
+          cd ../sri-client && pnpm pack --pack-destination ../../.tmp-packs
+          cd ../sdk && pnpm pack --pack-destination ../../.tmp-packs
+
+      - name: Verify tarballs exist
+        run: ls -la .tmp-packs/*.tgz
+
+  # Integration tests are NOT part of CI.
+  # They require a .p12 certificate and SRI PRUEBAS access.
+  # Run manually with: FACTURAYA_TEST_RUN_INTEGRATION=true node tests/sdk/run-integration.mjs

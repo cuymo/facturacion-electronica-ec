@@ -1,0 +1,56 @@
+{
+  "name": "@facturaya/sri-client",
+  "private": true,
+  "version": "0.1.0-beta.1",
+  "description": "SOAP client for SRI Ecuador reception and authorization web services",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": ["dist"],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "sri",
+    "ecuador",
+    "soap",
+    "comprobantes-electronicos",
+    "autorizacion",
+    "recepcion"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/facturaya/facturaya.git",
+    "directory": "packages/sri-client"
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@facturaya/core": "workspace:*",
+    "fast-xml-parser": ">=5.0.0 <6.0.0"
+  },
+  "devDependencies": {
+    "rimraf": "^6.0.0",
+    "tsup": "^8.4.0",
+    "typescript": "~5.7.0",
+    "vitest": "^3.0.0"
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "name": "facturacion-electronica-ec",
+  "version": "0.1.0-beta.1",
+  "description": "Libreria TypeScript para emision de comprobantes electronicos del SRI Ecuador. Soporta factura, liquidacion de compra, nota de credito, nota de debito, guia de remision y comprobante de retencion.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": ["dist", "xsd"],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "sri",
+    "ecuador",
+    "factura",
+    "facturacion-electronica",
+    "comprobantes-electronicos",
+    "nota-credito",
+    "nota-debito",
+    "retencion",
+    "guia-remision",
+    "liquidacion-compra",
+    "xades",
+    "xml",
+    "firma-electronica",
+    "clave-acceso"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cuymo/facturacion-electronica-ec.git",
+    "directory": "packages/sdk"
+  },
+  "homepage": "https://github.com/cuymo/facturacion-electronica-ec#readme",
+  "bugs": {
+    "url": "https://github.com/cuymo/facturacion-electronica-ec/issues"
+  },
+  "scripts": {
+    "build": "tsup && node -e \"const{cpSync,mkdirSync}=require('fs');mkdirSync('./xsd',{recursive:true});cpSync('../../vendor/sri/xsd','./xsd',{recursive:true,filter:(s)=>s.endsWith('.xsd')||!s.includes('.')})\"",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "fast-xml-parser": ">=5.0.0 <6.0.0"
+  },
+  "peerDependencies": {
+    "ec-sri-invoice-signer": ">=1.6.0 <2.0.0",
+    "xmllint-wasm": ">=5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "xmllint-wasm": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@facturaya/core": "workspace:*",
+    "@facturaya/signer": "workspace:*",
+    "@facturaya/sri-client": "workspace:*",
+    "ec-sri-invoice-signer": "^1.6.3",
+    "rimraf": "^6.0.0",
+    "tsup": "^8.4.0",
+    "typescript": "~5.7.0",
+    "vitest": "^3.0.0"
+  }
+}

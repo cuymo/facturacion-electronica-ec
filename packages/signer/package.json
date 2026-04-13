@@ -1,0 +1,59 @@
+{
+  "name": "@facturaya/signer",
+  "private": true,
+  "version": "0.1.0-beta.1",
+  "description": "XAdES-BES signing adapter for SRI Ecuador electronic documents",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": ["dist"],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "sri",
+    "ecuador",
+    "xades",
+    "firma-electronica",
+    "p12",
+    "xml-signature"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/facturaya/facturaya.git",
+    "directory": "packages/signer"
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@facturaya/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "ec-sri-invoice-signer": ">=1.6.0 <2.0.0"
+  },
+  "devDependencies": {
+    "ec-sri-invoice-signer": "^1.6.3",
+    "rimraf": "^6.0.0",
+    "tsup": "^8.4.0",
+    "typescript": "~5.7.0",
+    "vitest": "^3.0.0"
+  }
+}

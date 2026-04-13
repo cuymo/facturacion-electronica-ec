@@ -1,0 +1,12 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.turbo/
+coverage/
+.env
+.env.local
+.env.test
+*.p12
+*.pem
+.tmp-packs/
+tmp-test*/
