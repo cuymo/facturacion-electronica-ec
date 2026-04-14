@@ -118,6 +118,18 @@ describe("buildFacturaXml", () => {
     const xml2 = buildFacturaXml(ctxNo, FACTURA_DATA);
     expect(xml2).toContain("<obligadoContabilidad>NO</obligadoContabilidad>");
   });
+
+  it("should survive null or undefined properties gracefully", () => {
+    const data = {
+      ...FACTURA_DATA,
+      // Simulando datos incompletos
+      direccionComprador: null,
+      razonSocialComprador: undefined,
+    } as any;
+
+    const xml = buildFacturaXml(BASE_CTX, data);
+    expect(xml).toContain("<razonSocialComprador></razonSocialComprador>");
+  });
 });
 
 describe("buildDocumentXml dispatcher", () => {

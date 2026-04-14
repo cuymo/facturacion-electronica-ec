@@ -58,7 +58,10 @@ export function generateClaveAcceso(params: ClaveAccesoParams): string {
       `Invalid fechaEmision format: "${params.fechaEmision}". Expected dd/mm/yyyy.`
     );
   }
-  const fechaFormatted = parts[0]! + parts[1]! + parts[2]!;
+  const fechaFormatted =
+    parts[0]!.padStart(2, "0") +
+    parts[1]!.padStart(2, "0") +
+    parts[2]!;
 
   const segments: Array<{ name: string; value: string; expected: number }> = [
     { name: "fecha", value: fechaFormatted, expected: 8 },
