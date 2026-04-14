@@ -109,6 +109,23 @@ describe("generateClaveAcceso", () => {
     expect(clave.substring(10, 23)).toBe("0992877878001");
   });
 
+  it("should automatically zero-pad single digit dates", () => {
+    const clave = generateClaveAcceso({
+      fechaEmision: "5/5/2026",
+      tipoComprobante: "01",
+      ruc: "1790016919001",
+      ambiente: "1",
+      establecimiento: "001",
+      puntoEmision: "001",
+      secuencial: "000000001",
+      codigoNumerico: "12345678",
+      tipoEmision: "1",
+    });
+
+    // Sin la protección de `.padStart`, esto fallaría indicando que la longitud no es 8.
+    expect(clave.substring(0, 8)).toBe("05052026");
+  });
+
   it("should throw on invalid fecha format", () => {
     expect(() =>
       generateClaveAcceso({

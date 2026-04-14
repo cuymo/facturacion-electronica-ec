@@ -7,8 +7,9 @@
 
 import type { XmlBuildContext } from "../types/xml-build-context.js";
 
-export function escapeXml(text: string): string {
-  return text
+export function escapeXml(text: string | null | undefined): string {
+  if (text === null || text === undefined) return "";
+  return String(text)
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
@@ -16,12 +17,14 @@ export function escapeXml(text: string): string {
     .replace(/'/g, "&apos;");
 }
 
-export function toFixed2(n: number): string {
-  return n.toFixed(2);
+export function toFixed2(n: number | null | undefined): string {
+  if (n === null || n === undefined || isNaN(Number(n))) return "0.00";
+  return Number(n).toFixed(2);
 }
 
-export function toFixed6(n: number): string {
-  return n.toFixed(6);
+export function toFixed6(n: number | null | undefined): string {
+  if (n === null || n === undefined || isNaN(Number(n))) return "0.000000";
+  return Number(n).toFixed(6);
 }
 
 export function buildInfoTributariaXml(ctx: XmlBuildContext): string {
