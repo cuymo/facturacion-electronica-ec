@@ -15,15 +15,15 @@ import {
   type DocumentData,
   type Logger,
   type SriMensaje,
-  FacturaYaError,
+  FacturacionElectronicaECError,
   buildDocumentXml,
   generateClaveAcceso,
   generateCodigoNumerico,
   schemaRegistry,
   validateXmlAgainstXsd,
-} from "@facturaya/core";
-import type { ISigner, SignOptions } from "@facturaya/signer";
-import type { ISriClient, SriRecepcionResult, SriAutorizacionResult } from "@facturaya/sri-client";
+} from "@facturacion-ec/core";
+import type { ISigner, SignOptions } from "@facturacion-ec/signer";
+import type { ISriClient, SriRecepcionResult, SriAutorizacionResult } from "@facturacion-ec/sri-client";
 import type { ISequenceProvider } from "../sequence/sequence-provider.js";
 import type { EmissionResult, EmissionEstado } from "../emission-result.js";
 import type { EmissionHooks } from "../hooks.js";
@@ -163,7 +163,7 @@ export async function runEmissionPipeline(
     if (validateXsd) {
       const xsdResult = await validateXmlAgainstXsd(documentType, xmlOriginal);
       if (!xsdResult.valid) {
-        throw FacturaYaError.xmlStructure(
+        throw FacturacionElectronicaECError.xmlStructure(
           `XSD validation failed for ${documentType}: ${xsdResult.errors.join("; ")}`
         );
       }
@@ -174,7 +174,7 @@ export async function runEmissionPipeline(
     try {
       xmlFirmado = await signer.sign(xmlOriginal, documentType, signOptions);
     } catch (error) {
-      throw FacturaYaError.signing(
+      throw FacturacionElectronicaECError.signing(
         `Error al firmar XML: ${error instanceof Error ? error.message : String(error)}`,
         { cause: error instanceof Error ? error : undefined }
       );
@@ -399,16 +399,16 @@ function validateXmlStructure(
   rootTag: string
 ): void {
   if (!xml.startsWith("<?xml")) {
-    throw FacturaYaError.xmlStructure("XML falta declaracion <?xml");
+    throw FacturacionElectronicaECError.xmlStructure("XML falta declaracion <?xml");
   }
   if (!xml.includes("<infoTributaria>")) {
-    throw FacturaYaError.xmlStructure("XML falta bloque <infoTributaria>");
+    throw FacturacionElectronicaECError.xmlStructure("XML falta bloque <infoTributaria>");
   }
   if (!xml.includes(`<claveAcceso>${claveAcceso}</claveAcceso>`)) {
-    throw FacturaYaError.xmlStructure("XML falta <claveAcceso> correcta");
+    throw FacturacionElectronicaECError.xmlStructure("XML falta <claveAcceso> correcta");
   }
   if (!xml.includes(`<${rootTag}`)) {
-    throw FacturaYaError.xmlStructure(
+    throw FacturacionElectronicaECError.xmlStructure(
       `XML falta tag raiz <${rootTag}>`
     );
   }

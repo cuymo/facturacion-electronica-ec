@@ -4,7 +4,7 @@
  */
 
 import { XMLParser } from "fast-xml-parser";
-import type { SriMensaje } from "@facturaya/core";
+import type { SriMensaje } from "@facturacion-ec/core";
 
 export const sriParser = new XMLParser({
   ignoreAttributes: true,

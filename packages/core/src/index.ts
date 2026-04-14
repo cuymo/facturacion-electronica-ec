@@ -100,8 +100,8 @@ export {
 } from "./validation/index.js";
 
 // === Errors ===
-export type { FacturaYaErrorCode } from "./errors/index.js";
-export { FacturaYaError } from "./errors/index.js";
+export type { FacturacionElectronicaECErrorCode } from "./errors/index.js";
+export { FacturacionElectronicaECError } from "./errors/index.js";
 export type { SriMensaje } from "./errors/index.js";
 
 // === XSD Validation ===

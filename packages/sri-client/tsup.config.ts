@@ -7,5 +7,5 @@ export default defineConfig({
   clean: true,
   sourcemap: true,
   splitting: false,
-  external: ["@facturaya/core", "fast-xml-parser"],
+  external: ["@facturacion-ec/core", "fast-xml-parser"],
 });

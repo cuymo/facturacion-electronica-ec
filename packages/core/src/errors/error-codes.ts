@@ -1,10 +1,10 @@
 /**
- * Typed error codes for FacturaYa operations.
+ * Typed error codes for FacturacionElectronicaEC operations.
  *
  * Intentionally NOT HTTP status codes -- this is a library, not a web framework.
  * Consumers map these to their own error handling strategy.
  */
-export type FacturaYaErrorCode =
+export type FacturacionElectronicaECErrorCode =
   | "VALIDATION"
   | "CLAVE_ACCESO"
   | "XML_BUILD"

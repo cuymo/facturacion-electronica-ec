@@ -1,4 +1,4 @@
-import type { Ambiente } from "@facturaya/core";
+import type { Ambiente } from "@facturacion-ec/core";
 
 export interface SriEndpoints {
   recepcion: string;

@@ -1,5 +1,5 @@
 {
-  "name": "@facturaya/core",
+  "name": "@facturacion-ec/core",
   "private": true,
   "version": "0.1.0-beta.1",
   "description": "Core types, XML builders, clave de acceso, catalogs and validation for SRI Ecuador electronic invoicing",
@@ -36,7 +36,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/facturaya/facturaya.git",
+    "url": "https://github.com/cuymo/facturacion-electronica-ec.git",
     "directory": "packages/core"
   },
   "scripts": {

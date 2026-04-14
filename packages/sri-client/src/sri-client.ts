@@ -9,8 +9,8 @@
  * - Uses standard fetch() (Node 18+)
  */
 
-import type { Ambiente, Logger } from "@facturaya/core";
-import { FacturaYaError } from "@facturaya/core";
+import type { Ambiente, Logger } from "@facturacion-ec/core";
+import { FacturacionElectronicaECError } from "@facturacion-ec/core";
 import type { ISriClient } from "./sri-client.interface.js";
 import type { SriRecepcionResult, SriAutorizacionResult } from "./types.js";
 import { SRI_ENDPOINTS } from "./endpoints.js";
@@ -165,22 +165,22 @@ export class SriClient implements ISriClient {
           responseBody: errorBody,
           endpoint,
         });
-        throw FacturaYaError.sriCommunication(
+        throw FacturacionElectronicaECError.sriCommunication(
           `SRI endpoint returned HTTP ${response.status}: ${response.statusText}`
         );
       }
 
       return response;
     } catch (error) {
-      if (error instanceof FacturaYaError) throw error;
+      if (error instanceof FacturacionElectronicaECError) throw error;
 
       if (error instanceof DOMException && error.name === "AbortError") {
-        throw FacturaYaError.sriCommunication(
+        throw FacturacionElectronicaECError.sriCommunication(
           `SRI request timed out after ${this.timeoutMs}ms`
         );
       }
 
-      throw FacturaYaError.sriCommunication(
+      throw FacturacionElectronicaECError.sriCommunication(
         `SRI communication error: ${error instanceof Error ? error.message : String(error)}`,
         { cause: error instanceof Error ? error : undefined }
       );

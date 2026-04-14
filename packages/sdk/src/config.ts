@@ -1,13 +1,13 @@
-import type { Emisor, Logger } from "@facturaya/core";
-import type { ISigner } from "@facturaya/signer";
-import type { ISriClient } from "@facturaya/sri-client";
+import type { Emisor, Logger } from "@facturacion-ec/core";
+import type { ISigner } from "@facturacion-ec/signer";
+import type { ISriClient } from "@facturacion-ec/sri-client";
 import type { ISequenceProvider } from "./sequence/sequence-provider.js";
 import type { EmissionHooks } from "./hooks.js";
 
 /**
- * Configuration for a FacturaYa SDK instance.
+ * Configuration for a FacturacionElectronicaEC SDK instance.
  */
-export interface FacturaYaConfig {
+export interface FacturacionElectronicaECConfig {
   /** Emisor (issuer) data. Used for all documents emitted by this instance. */
   emisor: Emisor;
 

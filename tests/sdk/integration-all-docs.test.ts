@@ -2,7 +2,7 @@
  * Integration tests for all 6 document types against SRI PRUEBAS.
  *
  * SKIPPED by default. Only runs when:
- *   FACTURAYA_TEST_RUN_INTEGRATION=true
+ *   FACTURACION_EC_TEST_RUN_INTEGRATION=true
  *
  * SAFETY: Hardcoded to ambiente '1' (PRUEBAS).
  */
@@ -45,16 +45,16 @@ const env = loadEnv();
 // Only enable if BOTH: process.env flag is set AND .env.test says true.
 // This prevents accidental runs from `npx vitest run` (which doesn't set the process env).
 const INTEGRATION_ENABLED =
-  process.env.FACTURAYA_TEST_RUN_INTEGRATION === "true" ||
-  (env.FACTURAYA_TEST_RUN_INTEGRATION === "true" &&
-    process.env.FACTURAYA_RUN_ALL_INTEGRATION === "true");
+  process.env.FACTURACION_EC_TEST_RUN_INTEGRATION === "true" ||
+  (env.FACTURACION_EC_TEST_RUN_INTEGRATION === "true" &&
+    process.env.FACTURACION_EC_RUN_ALL_INTEGRATION === "true");
 
 // ─── Safety guard ───
 if (INTEGRATION_ENABLED) {
-  const amb = env.FACTURAYA_TEST_AMBIENTE;
+  const amb = env.FACTURACION_EC_TEST_AMBIENTE;
   if (amb && amb !== "1") {
     throw new Error(
-      "FATAL: FACTURAYA_TEST_AMBIENTE=" +
+      "FATAL: FACTURACION_EC_TEST_AMBIENTE=" +
         amb +
         " — MUST be '1'. Integration against PRODUCCION is blocked."
     );
@@ -64,7 +64,7 @@ if (INTEGRATION_ENABLED) {
 const FORCED_AMBIENTE = "1" as const;
 
 describe.skipIf(!INTEGRATION_ENABLED)("SRI PRUEBAS — All Documents", () => {
-  let FacturaYa: any;
+  let FacturacionElectronicaEC: any;
   let UnsafeMemorySequenceProvider: any;
   let p12: Buffer;
   let p12Password: string;
@@ -80,10 +80,10 @@ describe.skipIf(!INTEGRATION_ENABLED)("SRI PRUEBAS — All Documents", () => {
   };
 
   function createFy() {
-    return new FacturaYa({
+    return new FacturacionElectronicaEC({
       emisor: {
         ruc,
-        razonSocial: "PRUEBA INTEGRACION FACTURAYA",
+        razonSocial: "PRUEBA INTEGRACION FACTURACION EC",
         dirMatriz: "Quito, Direccion de Prueba",
         establecimiento: "001",
         puntoEmision: "001",
@@ -99,19 +99,19 @@ describe.skipIf(!INTEGRATION_ENABLED)("SRI PRUEBAS — All Documents", () => {
 
   beforeAll(async () => {
     const sdk = await import("../../packages/sdk/dist/index.js");
-    FacturaYa = sdk.FacturaYa;
+    FacturacionElectronicaEC = sdk.FacturacionElectronicaEC;
     UnsafeMemorySequenceProvider = sdk.UnsafeMemorySequenceProvider;
 
-    const p12Path = env.FACTURAYA_TEST_P12_PATH;
-    if (!p12Path) throw new Error("FACTURAYA_TEST_P12_PATH required");
+    const p12Path = env.FACTURACION_EC_TEST_P12_PATH;
+    if (!p12Path) throw new Error("FACTURACION_EC_TEST_P12_PATH required");
     p12 = readFileSync(resolve(ROOT, p12Path));
 
-    p12Password = env.FACTURAYA_TEST_P12_PASSWORD ?? "";
-    if (!p12Password) throw new Error("FACTURAYA_TEST_P12_PASSWORD required");
+    p12Password = env.FACTURACION_EC_TEST_P12_PASSWORD ?? "";
+    if (!p12Password) throw new Error("FACTURACION_EC_TEST_P12_PASSWORD required");
 
-    ruc = env.FACTURAYA_TEST_RUC ?? "";
+    ruc = env.FACTURACION_EC_TEST_RUC ?? "";
     if (!/^\d{13}$/.test(ruc))
-      throw new Error("FACTURAYA_TEST_RUC must be 13 digits");
+      throw new Error("FACTURACION_EC_TEST_RUC must be 13 digits");
 
     sequenceProvider = new UnsafeMemorySequenceProvider();
   });

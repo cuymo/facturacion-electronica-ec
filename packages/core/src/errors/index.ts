@@ -1,3 +1,3 @@
-export type { FacturaYaErrorCode } from "./error-codes.js";
-export { FacturaYaError } from "./facturaya-error.js";
-export type { SriMensaje } from "./facturaya-error.js";
+export type { FacturacionElectronicaECErrorCode } from "./error-codes.js";
+export { FacturacionElectronicaECError } from "./facturacion-electronica-ec-error.js";
+export type { SriMensaje } from "./facturacion-electronica-ec-error.js";

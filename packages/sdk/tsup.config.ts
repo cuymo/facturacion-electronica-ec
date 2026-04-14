@@ -7,7 +7,7 @@ export default defineConfig({
   clean: true,
   sourcemap: true,
   splitting: false,
-  // Internal packages (@facturaya/*) are bundled INTO this package.
+  // Internal packages (@facturacion-ec/*) are bundled INTO this package.
   // Only true external deps that the consumer must install are listed here.
   external: [
     "ec-sri-invoice-signer",
@@ -18,8 +18,8 @@ export default defineConfig({
   // Ensure Node built-ins are not bundled
   platform: "node",
   noExternal: [
-    "@facturaya/core",
-    "@facturaya/signer",
-    "@facturaya/sri-client",
+    "@facturacion-ec/core",
+    "@facturacion-ec/signer",
+    "@facturacion-ec/sri-client",
   ],
 });

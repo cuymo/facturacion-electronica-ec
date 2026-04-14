@@ -1,4 +1,4 @@
-import type { Ambiente } from "@facturaya/core";
+import type { Ambiente } from "@facturacion-ec/core";
 import type { SriRecepcionResult, SriAutorizacionResult } from "./types.js";
 
 /**

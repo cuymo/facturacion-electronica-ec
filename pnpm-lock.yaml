@@ -48,14 +48,17 @@ importers:
       fast-xml-parser:
         specifier: '>=5.0.0 <6.0.0'
         version: 5.5.11
+      xmllint-wasm:
+        specifier: '>=5.0.0'
+        version: 5.2.0(@types/node@25.6.0)
     devDependencies:
-      '@facturaya/core':
+      '@facturacion-ec/core':
         specifier: workspace:*
         version: link:../core
-      '@facturaya/signer':
+      '@facturacion-ec/signer':
         specifier: workspace:*
         version: link:../signer
-      '@facturaya/sri-client':
+      '@facturacion-ec/sri-client':
         specifier: workspace:*
         version: link:../sri-client
       ec-sri-invoice-signer:
@@ -76,7 +79,7 @@ importers:
 
   packages/signer:
     dependencies:
-      '@facturaya/core':
+      '@facturacion-ec/core':
         specifier: workspace:*
         version: link:../core
     devDependencies:
@@ -98,7 +101,7 @@ importers:
 
   packages/sri-client:
     dependencies:
-      '@facturaya/core':
+      '@facturacion-ec/core':
         specifier: workspace:*
         version: link:../core
       fast-xml-parser:

@@ -74,4 +74,4 @@ jobs:
 
   # Integration tests are NOT part of CI.
   # They require a .p12 certificate and SRI PRUEBAS access.
-  # Run manually with: FACTURAYA_TEST_RUN_INTEGRATION=true node tests/sdk/run-integration.mjs
+  # Run manually with: FACTURACION_EC_TEST_RUN_INTEGRATION=true node tests/sdk/run-integration.mjs

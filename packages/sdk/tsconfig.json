@@ -3,9 +3,9 @@
   "compilerOptions": {
     "noEmit": true,
     "paths": {
-      "@facturaya/core": ["../core/src/index.ts"],
-      "@facturaya/signer": ["../signer/src/index.ts"],
-      "@facturaya/sri-client": ["../sri-client/src/index.ts"]
+      "@facturacion-ec/core": ["../core/src/index.ts"],
+      "@facturacion-ec/signer": ["../signer/src/index.ts"],
+      "@facturacion-ec/sri-client": ["../sri-client/src/index.ts"]
     }
   },
   "include": ["src"]

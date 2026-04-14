@@ -39,19 +39,19 @@ for (const line of envContent.split("\n")) {
 // ─── Safety checks ───
 console.log("=== SAFETY CHECKS ===");
 
-if (env.FACTURAYA_TEST_RUN_INTEGRATION !== "true") {
-  console.error("FATAL: FACTURAYA_TEST_RUN_INTEGRATION is not 'true'");
+if (env.FACTURACION_EC_TEST_RUN_INTEGRATION !== "true") {
+  console.error("FATAL: FACTURACION_EC_TEST_RUN_INTEGRATION is not 'true'");
   process.exit(1);
 }
 console.log("  Integration flag: true");
 
-if (env.FACTURAYA_TEST_AMBIENTE && env.FACTURAYA_TEST_AMBIENTE !== "1") {
-  console.error("FATAL: FACTURAYA_TEST_AMBIENTE=" + env.FACTURAYA_TEST_AMBIENTE + " — MUST be '1'");
+if (env.FACTURACION_EC_TEST_AMBIENTE && env.FACTURACION_EC_TEST_AMBIENTE !== "1") {
+  console.error("FATAL: FACTURACION_EC_TEST_AMBIENTE=" + env.FACTURACION_EC_TEST_AMBIENTE + " — MUST be '1'");
   process.exit(1);
 }
 console.log("  Ambiente: 1 (PRUEBAS) — FORCED");
 
-const p12Path = resolve(ROOT, env.FACTURAYA_TEST_P12_PATH || "");
+const p12Path = resolve(ROOT, env.FACTURACION_EC_TEST_P12_PATH || "");
 let p12;
 try {
   p12 = readFileSync(p12Path);
@@ -61,16 +61,16 @@ try {
   process.exit(1);
 }
 
-const p12Password = env.FACTURAYA_TEST_P12_PASSWORD || "";
+const p12Password = env.FACTURACION_EC_TEST_P12_PASSWORD || "";
 if (!p12Password) {
-  console.error("FATAL: FACTURAYA_TEST_P12_PASSWORD is empty");
+  console.error("FATAL: FACTURACION_EC_TEST_P12_PASSWORD is empty");
   process.exit(1);
 }
 console.log("  P12 password: *** (loaded, " + p12Password.length + " chars)");
 
-const ruc = env.FACTURAYA_TEST_RUC || "";
+const ruc = env.FACTURACION_EC_TEST_RUC || "";
 if (!/^\d{13}$/.test(ruc)) {
-  console.error("FATAL: FACTURAYA_TEST_RUC must be 13 digits, got:", ruc.length, "chars");
+  console.error("FATAL: FACTURACION_EC_TEST_RUC must be 13 digits, got:", ruc.length, "chars");
   process.exit(1);
 }
 console.log("  RUC: " + ruc.substring(0, 4) + "..." + ruc.substring(10) + " (masked)");
@@ -79,15 +79,15 @@ console.log("  ALL SAFETY CHECKS PASSED\n");
 
 // ─── Import SDK ───
 // Import from built dist (run `pnpm -r build` first)
-const { FacturaYa, UnsafeMemorySequenceProvider } = await import("../../packages/sdk/dist/index.js");
+const { FacturacionElectronicaEC, UnsafeMemorySequenceProvider } = await import("../../packages/sdk/dist/index.js");
 
 const sequenceProvider = new UnsafeMemorySequenceProvider();
 
 function createFy() {
-  return new FacturaYa({
+  return new FacturacionElectronicaEC({
     emisor: {
       ruc,
-      razonSocial: "PRUEBA INTEGRACION FACTURAYA",
+      razonSocial: "PRUEBA INTEGRACION FACTURACION EC",
       dirMatriz: "Quito, Direccion de Prueba",
       establecimiento: "001",
       puntoEmision: "001",
@@ -163,7 +163,7 @@ try {
     pagos: [{ formaPago: "01", total: 1.15 }],
     detalles: [{
       codigoPrincipal: "INTEG-TEST-001",
-      descripcion: "Item de prueba integracion FacturaYa",
+      descripcion: "Item de prueba integracion FacturacionElectronicaEC",
       cantidad: 1,
       precioUnitario: 1.00,
       descuento: 0,

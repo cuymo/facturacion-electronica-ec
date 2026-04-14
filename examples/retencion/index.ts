@@ -5,10 +5,10 @@
  */
 
 import { readFileSync } from "fs";
-import { FacturaYa, UnsafeMemorySequenceProvider } from "facturacion-electronica-ec";
+import { FacturacionElectronicaEC, UnsafeMemorySequenceProvider } from "facturacion-electronica-ec";
 
 async function main() {
-  const fy = new FacturaYa({
+  const fy = new FacturacionElectronicaEC({
     emisor: {
       ruc: "0992877878001",
       razonSocial: "MI EMPRESA S.A.",

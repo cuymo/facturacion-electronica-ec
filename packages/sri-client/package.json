@@ -1,5 +1,5 @@
 {
-  "name": "@facturaya/sri-client",
+  "name": "@facturacion-ec/sri-client",
   "private": true,
   "version": "0.1.0-beta.1",
   "description": "SOAP client for SRI Ecuador reception and authorization web services",
@@ -34,7 +34,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/facturaya/facturaya.git",
+    "url": "https://github.com/cuymo/facturacion-electronica-ec.git",
     "directory": "packages/sri-client"
   },
   "scripts": {
@@ -44,7 +44,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@facturaya/core": "workspace:*",
+    "@facturacion-ec/core": "workspace:*",
     "fast-xml-parser": ">=5.0.0 <6.0.0"
   },
   "devDependencies": {

@@ -16,7 +16,7 @@
  */
 
 import { createRequire } from "node:module";
-import type { DocumentType } from "@facturaya/core";
+import type { DocumentType } from "@facturacion-ec/core";
 import type { ISigner, SignOptions } from "./signer.interface.js";
 
 // In ESM, use createRequire(import.meta.url).
@@ -73,7 +73,7 @@ function getSignFunctions(): Map<DocumentType, (xml: string, p12: Buffer, passwo
       throw new Error(
         "[EcSriSigner] Cannot sign liquidacionCompra: " +
           "ec-sri-invoice-signer does not export signDocumentXml. " +
-          "The internal path may have changed. See @facturaya/signer README."
+          "The internal path may have changed. See @facturacion-ec/signer README."
       );
     };
   }

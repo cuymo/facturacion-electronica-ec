@@ -1,4 +1,4 @@
-import type { SriMensaje } from "@facturaya/core";
+import type { SriMensaje } from "@facturacion-ec/core";
 
 /** Result from the SRI reception (validarComprobante) endpoint. */
 export interface SriRecepcionResult {

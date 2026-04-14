@@ -1,5 +1,5 @@
 /**
- * Example: Emit a basic factura using FacturaYa SDK.
+ * Example: Emit a basic factura using FacturacionElectronicaEC SDK.
  *
  * Prerequisites:
  * - A .p12 certificate file for SRI testing
@@ -9,14 +9,14 @@
  */
 
 import { readFileSync } from "fs";
-import { FacturaYa, UnsafeMemorySequenceProvider } from "facturacion-electronica-ec";
+import { FacturacionElectronicaEC, UnsafeMemorySequenceProvider } from "facturacion-electronica-ec";
 
 async function main() {
   // WARNING: UnsafeMemorySequenceProvider is for testing ONLY.
   // In production, implement ISequenceProvider backed by your database.
   const sequenceProvider = new UnsafeMemorySequenceProvider();
 
-  const fy = new FacturaYa({
+  const fy = new FacturacionElectronicaEC({
     emisor: {
       ruc: "0992877878001",
       razonSocial: "MI EMPRESA DE PRUEBA S.A.",

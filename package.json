@@ -1,5 +1,5 @@
 {
-  "name": "facturaya",
+  "name": "facturacion-electronica-ec-monorepo",
   "private": true,
   "description": "Libreria open source para emision de comprobantes electronicos del SRI Ecuador",
   "license": "MIT",

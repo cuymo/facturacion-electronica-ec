@@ -1,5 +1,5 @@
-import type { Ambiente, SriMensaje } from "@facturaya/core";
-import type { SriRecepcionResult, SriAutorizacionResult } from "@facturaya/sri-client";
+import type { Ambiente, SriMensaje } from "@facturacion-ec/core";
+import type { SriRecepcionResult, SriAutorizacionResult } from "@facturacion-ec/sri-client";
 
 /**
  * Terminal status of an emission attempt.

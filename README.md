@@ -47,9 +47,9 @@ npm install facturacion-electronica-ec ec-sri-invoice-signer
 
 ```typescript
 import { readFileSync } from 'fs';
-import { FacturaYa } from 'facturacion-electronica-ec';
+import { FacturacionElectronicaEC } from 'facturacion-electronica-ec';
 
-const fy = new FacturaYa({
+const fy = new FacturacionElectronicaEC({
   emisor: {
     ruc: '0992877878001',
     razonSocial: 'MI EMPRESA S.A.',
@@ -142,7 +142,7 @@ const auth = await fy.checkAuthorization(claveAcceso);
 ## Configuracion avanzada
 
 ```typescript
-new FacturaYa({
+new FacturacionElectronicaEC({
   // ...emisor, p12, sequenceProvider
   signer: customSigner,          // Reemplazar firmador XAdES
   sriClient: customClient,       // Reemplazar cliente SOAP

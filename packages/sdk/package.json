@@ -67,9 +67,9 @@
     }
   },
   "devDependencies": {
-    "@facturaya/core": "workspace:*",
-    "@facturaya/signer": "workspace:*",
-    "@facturaya/sri-client": "workspace:*",
+    "@facturacion-ec/core": "workspace:*",
+    "@facturacion-ec/signer": "workspace:*",
+    "@facturacion-ec/sri-client": "workspace:*",
     "ec-sri-invoice-signer": "^1.6.3",
     "rimraf": "^6.0.0",
     "tsup": "^8.4.0",

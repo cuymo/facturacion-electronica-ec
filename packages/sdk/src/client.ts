@@ -1,5 +1,5 @@
 /**
- * FacturaYa SDK -- Main orchestrator class.
+ * FacturacionElectronicaEC SDK -- Main orchestrator class.
  *
  * Provides a high-level API for emitting SRI electronic documents
  * and low-level access to individual pipeline steps.
@@ -16,7 +16,7 @@ import {
   type RetencionData,
   type XmlBuildContext,
   type CatalogEntry,
-  FacturaYaError,
+  FacturacionElectronicaECError,
   buildDocumentXml,
   validateFactura,
   validateNotaCredito,
@@ -26,21 +26,21 @@ import {
   validateLiquidacionCompra,
   catalogRegistry,
   schemaRegistry,
-} from "@facturaya/core";
-import type { ValidationResult } from "@facturaya/core";
-import { EcSriSigner } from "@facturaya/signer";
-import type { ISigner } from "@facturaya/signer";
-import { SriClient } from "@facturaya/sri-client";
-import type { ISriClient, SriRecepcionResult, SriAutorizacionResult } from "@facturaya/sri-client";
+} from "@facturacion-ec/core";
+import type { ValidationResult } from "@facturacion-ec/core";
+import { EcSriSigner } from "@facturacion-ec/signer";
+import type { ISigner } from "@facturacion-ec/signer";
+import { SriClient } from "@facturacion-ec/sri-client";
+import type { ISriClient, SriRecepcionResult, SriAutorizacionResult } from "@facturacion-ec/sri-client";
 
-import type { FacturaYaConfig } from "./config.js";
+import type { FacturacionElectronicaECConfig } from "./config.js";
 import type { EmissionResult } from "./emission-result.js";
 import { runEmissionPipeline } from "./pipeline/emission-pipeline.js";
 
-export class FacturaYa {
+export class FacturacionElectronicaEC {
   private readonly config: Required<
     Pick<
-      FacturaYaConfig,
+      FacturacionElectronicaECConfig,
       | "emisor"
       | "p12"
       | "p12Password"
@@ -51,14 +51,14 @@ export class FacturaYa {
       | "sendRetryDelayMs"
     >
   > &
-    FacturaYaConfig;
+    FacturacionElectronicaECConfig;
 
   private readonly signer: ISigner;
   private readonly sriClient: ISriClient;
 
-  constructor(config: FacturaYaConfig) {
+  constructor(config: FacturacionElectronicaECConfig) {
     if (!config.sequenceProvider) {
-      throw FacturaYaError.configuration(
+      throw FacturacionElectronicaECError.configuration(
         "sequenceProvider es obligatorio. Use UnsafeMemorySequenceProvider solo para tests."
       );
     }
@@ -222,7 +222,7 @@ export class FacturaYa {
       const messages = result.errors
         .map((e) => `${e.field}: ${e.message}`)
         .join("; ");
-      throw FacturaYaError.validation(messages);
+      throw FacturacionElectronicaECError.validation(messages);
     }
   }
 }

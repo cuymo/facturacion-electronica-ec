@@ -39,15 +39,15 @@ function loadEnv() {
 const env = loadEnv();
 
 // ─── Safety ───
-if (env.FACTURAYA_TEST_AMBIENTE && env.FACTURAYA_TEST_AMBIENTE !== "1") {
-  console.error("FATAL: ambiente must be '1'. Got:", env.FACTURAYA_TEST_AMBIENTE);
+if (env.FACTURACION_EC_TEST_AMBIENTE && env.FACTURACION_EC_TEST_AMBIENTE !== "1") {
+  console.error("FATAL: ambiente must be '1'. Got:", env.FACTURACION_EC_TEST_AMBIENTE);
   process.exit(1);
 }
 
-const p12Path = resolve(ROOT, env.FACTURAYA_TEST_P12_PATH || "");
+const p12Path = resolve(ROOT, env.FACTURACION_EC_TEST_P12_PATH || "");
 const p12 = readFileSync(p12Path);
-const p12Password = env.FACTURAYA_TEST_P12_PASSWORD || "";
-const ruc = env.FACTURAYA_TEST_RUC || "";
+const p12Password = env.FACTURACION_EC_TEST_P12_PASSWORD || "";
+const ruc = env.FACTURACION_EC_TEST_RUC || "";
 
 console.log("=== SAFETY CHECKS ===");
 console.log("  Ambiente: 1 (PRUEBAS) — FORCED");
@@ -57,7 +57,7 @@ console.log("  RUC: " + ruc.substring(0, 4) + "..." + ruc.substring(10));
 console.log("");
 
 // ─── Import SDK ───
-const { FacturaYa, UnsafeMemorySequenceProvider } = await import("../../packages/sdk/dist/index.js");
+const { FacturacionElectronicaEC, UnsafeMemorySequenceProvider } = await import("../../packages/sdk/dist/index.js");
 
 const sequenceProvider = new UnsafeMemorySequenceProvider();
 // Start sequences high to avoid collision with previously authorized docs.
@@ -71,10 +71,10 @@ sequenceProvider.set("001", "001", "COMPROBANTE_RETENCION", SEQ_START);
 sequenceProvider.set("001", "001", "GUIA_REMISION", SEQ_START);
 
 function createFy() {
-  return new FacturaYa({
+  return new FacturacionElectronicaEC({
     emisor: {
       ruc,
-      razonSocial: "PRUEBA INTEGRACION FACTURAYA",
+      razonSocial: "PRUEBA INTEGRACION FACTURACION EC",
       dirMatriz: "Quito, Direccion de Prueba",
       establecimiento: "001",
       puntoEmision: "001",
@@ -151,7 +151,7 @@ const t1 = Date.now();
 const facturaResult = await createFy().emitirFactura({
   fechaEmision: today,
   tipoIdentificacionComprador: "04",
-  razonSocialComprador: "PRUEBA INTEGRACION FACTURAYA",
+  razonSocialComprador: "PRUEBA INTEGRACION FACTURACION EC",
   identificacionComprador: ruc,
   totalSinImpuestos: 1.00,
   totalDescuento: 0,
@@ -215,7 +215,7 @@ const t3 = Date.now();
 const ncResult = await createFy().emitirNotaCredito({
   fechaEmision: today,
   tipoIdentificacionComprador: "04",
-  razonSocialComprador: "PRUEBA INTEGRACION FACTURAYA",
+  razonSocialComprador: "PRUEBA INTEGRACION FACTURACION EC",
   identificacionComprador: ruc,
   codDocModificado: "01",
   numDocModificado: facturaNumDoc,
@@ -243,7 +243,7 @@ const t4 = Date.now();
 const ndResult = await createFy().emitirNotaDebito({
   fechaEmision: today,
   tipoIdentificacionComprador: "04",
-  razonSocialComprador: "PRUEBA INTEGRACION FACTURAYA",
+  razonSocialComprador: "PRUEBA INTEGRACION FACTURACION EC",
   identificacionComprador: ruc,
   codDocModificado: "01",
   numDocModificado: facturaNumDoc,
@@ -266,7 +266,7 @@ const t5 = Date.now();
 const retResult = await createFy().emitirRetencion({
   fechaEmision: today,
   tipoIdentificacionSujetoRetenido: "04",
-  razonSocialSujetoRetenido: "PRUEBA INTEGRACION FACTURAYA",
+  razonSocialSujetoRetenido: "PRUEBA INTEGRACION FACTURACION EC",
   identificacionSujetoRetenido: ruc,
   periodoFiscal: periodoFiscal,
   docsSustento: [{
@@ -308,7 +308,7 @@ console.log("");
 const t6 = Date.now();
 const grResult = await createFy().emitirGuiaRemision({
   dirPartida: "Quito, Av. Amazonas N36-152",
-  razonSocialTransportista: "PRUEBA INTEGRACION FACTURAYA",
+  razonSocialTransportista: "PRUEBA INTEGRACION FACTURACION EC",
   tipoIdentificacionTransportista: "04",
   rucTransportista: ruc,
   fechaIniTransporte: today,

@@ -1,5 +1,5 @@
-import type { FacturaYaError } from "@facturaya/core";
-import type { SriRecepcionResult, SriAutorizacionResult } from "@facturaya/sri-client";
+import type { FacturacionElectronicaECError } from "@facturacion-ec/core";
+import type { SriRecepcionResult, SriAutorizacionResult } from "@facturacion-ec/sri-client";
 
 /**
  * Lifecycle hooks for the emission pipeline.
@@ -27,5 +27,5 @@ export interface EmissionHooks {
   onAuthorized?(claveAcceso: string, numeroAutorizacion: string): void | Promise<void>;
 
   /** Called on any error during the pipeline. */
-  onError?(error: FacturaYaError): void | Promise<void>;
+  onError?(error: FacturacionElectronicaECError): void | Promise<void>;
 }

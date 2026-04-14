@@ -1,8 +1,8 @@
 // ─── Main SDK class ───
-export { FacturaYa } from "./facturaya.js";
+export { FacturacionElectronicaEC } from "./client.js";
 
 // ─── Configuration ───
-export type { FacturaYaConfig } from "./config.js";
+export type { FacturacionElectronicaECConfig } from "./config.js";
 
 // ─── Emission result ───
 export type { EmissionResult, EmissionEstado } from "./emission-result.js";
@@ -32,11 +32,11 @@ export type {
   CatalogMeta,
   ValidationResult,
   ValidationError,
-  FacturaYaErrorCode,
+  FacturacionElectronicaECErrorCode,
   SriMensaje,
   Logger,
   XsdValidationResult,
-} from "@facturaya/core";
+} from "@facturacion-ec/core";
 
 // ─── Core document data types ───
 export type {
@@ -56,11 +56,11 @@ export type {
   RetencionDocTax,
   RetencionRetencion,
   DocumentData,
-} from "@facturaya/core";
+} from "@facturacion-ec/core";
 
 // ─── Core functions ───
 export {
-  FacturaYaError,
+  FacturacionElectronicaECError,
   // Clave de acceso
   generateClaveAcceso,
   generateCodigoNumerico,
@@ -114,13 +114,13 @@ export {
   validateXmlAgainstXsd,
   getAvailableXsdTypes,
   registerXsdSearchPath,
-} from "@facturaya/core";
+} from "@facturacion-ec/core";
 
 // ─── Signer interface ───
-export type { ISigner, SignOptions } from "@facturaya/signer";
-export { EcSriSigner } from "@facturaya/signer";
+export type { ISigner, SignOptions } from "@facturacion-ec/signer";
+export { EcSriSigner } from "@facturacion-ec/signer";
 
 // ─── SRI Client interface ───
-export type { ISriClient, SriRecepcionResult, SriAutorizacionResult } from "@facturaya/sri-client";
-export { SriClient, SRI_ENDPOINTS } from "@facturaya/sri-client";
-export type { SriClientOptions, SriEndpoints } from "@facturaya/sri-client";
+export type { ISriClient, SriRecepcionResult, SriAutorizacionResult } from "@facturacion-ec/sri-client";
+export { SriClient, SRI_ENDPOINTS } from "@facturacion-ec/sri-client";
+export type { SriClientOptions, SriEndpoints } from "@facturacion-ec/sri-client";

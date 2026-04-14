@@ -1,4 +1,4 @@
-import type { DocumentType } from "@facturaya/core";
+import type { DocumentType } from "@facturacion-ec/core";
 
 /**
  * Options for signing an XML document.

@@ -20,7 +20,7 @@ Single published package: `facturacion-electronica-ec` (bundles core, signer, sr
 
 ### Known risks
 
-- `@facturaya/signer` uses a private submodule import from `ec-sri-invoice-signer` for
+- `@facturacion-ec/signer` uses a private submodule import from `ec-sri-invoice-signer` for
   liquidacionCompra signing. This path may break on upstream updates.
 - SRI catalogs (tax rates, retention codes) are bundled as static defaults. Override via
   `catalogRegistry.override()` if SRI changes rates before a library update.

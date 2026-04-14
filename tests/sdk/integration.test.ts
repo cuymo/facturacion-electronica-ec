@@ -2,12 +2,12 @@
  * Integration tests against SRI PRUEBAS environment.
  *
  * SKIPPED by default. Only runs when:
- *   FACTURAYA_TEST_RUN_INTEGRATION=true
+ *   FACTURACION_EC_TEST_RUN_INTEGRATION=true
  *
  * Requires:
- *   FACTURAYA_TEST_P12_PATH     - path to test .p12 certificate
- *   FACTURAYA_TEST_P12_PASSWORD - password for the .p12
- *   FACTURAYA_TEST_RUC          - RUC associated with the certificate
+ *   FACTURACION_EC_TEST_P12_PATH     - path to test .p12 certificate
+ *   FACTURACION_EC_TEST_P12_PASSWORD - password for the .p12
+ *   FACTURACION_EC_TEST_RUC          - RUC associated with the certificate
  *
  * SAFETY: These tests ALWAYS use ambiente '1' (PRUEBAS).
  * Any attempt to use ambiente '2' is blocked with a hard error.
@@ -18,21 +18,21 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 // Lazy imports — only loaded if integration is enabled
-let FacturaYa: typeof import("../../packages/sdk/src/index.js").FacturaYa;
+let FacturacionElectronicaEC: typeof import("../../packages/sdk/src/index.js").FacturacionElectronicaEC;
 let UnsafeMemorySequenceProvider: typeof import("../../packages/sdk/src/index.js").UnsafeMemorySequenceProvider;
 
 const INTEGRATION_ENABLED =
-  process.env.FACTURAYA_TEST_RUN_INTEGRATION === "true";
+  process.env.FACTURACION_EC_TEST_RUN_INTEGRATION === "true";
 
 // ======================== SAFETY GUARD ========================
 // Block any accidental use of ambiente '2' (PRODUCCION)
 const FORCED_AMBIENTE = "1" as const;
 
 if (INTEGRATION_ENABLED) {
-  const envAmbiente = process.env.FACTURAYA_TEST_AMBIENTE;
+  const envAmbiente = process.env.FACTURACION_EC_TEST_AMBIENTE;
   if (envAmbiente && envAmbiente !== "1") {
     throw new Error(
-      "FATAL: FACTURAYA_TEST_AMBIENTE is set to '" +
+      "FATAL: FACTURACION_EC_TEST_AMBIENTE is set to '" +
         envAmbiente +
         "'. Integration tests MUST use ambiente '1' (PRUEBAS). " +
         "Running tests against PRODUCCION is blocked."
@@ -50,32 +50,32 @@ describe.skipIf(!INTEGRATION_ENABLED)(
 
     beforeAll(async () => {
       // Dynamic import so the test file can be parsed even when
-      // @facturaya packages are not installed
+      // @facturacion-ec packages are not installed
       const sdkMod = await import("../../packages/sdk/src/index.js");
-      FacturaYa = sdkMod.FacturaYa;
+      FacturacionElectronicaEC = sdkMod.FacturacionElectronicaEC;
       UnsafeMemorySequenceProvider = sdkMod.UnsafeMemorySequenceProvider;
 
-      const p12Path = process.env.FACTURAYA_TEST_P12_PATH;
+      const p12Path = process.env.FACTURACION_EC_TEST_P12_PATH;
       if (!p12Path) {
-        throw new Error("FACTURAYA_TEST_P12_PATH is required");
+        throw new Error("FACTURACION_EC_TEST_P12_PATH is required");
       }
       p12 = readFileSync(resolve(p12Path));
 
-      p12Password = process.env.FACTURAYA_TEST_P12_PASSWORD ?? "";
+      p12Password = process.env.FACTURACION_EC_TEST_P12_PASSWORD ?? "";
       if (!p12Password) {
-        throw new Error("FACTURAYA_TEST_P12_PASSWORD is required");
+        throw new Error("FACTURACION_EC_TEST_P12_PASSWORD is required");
       }
 
-      ruc = process.env.FACTURAYA_TEST_RUC ?? "";
+      ruc = process.env.FACTURACION_EC_TEST_RUC ?? "";
       if (!ruc || ruc.length !== 13) {
         throw new Error(
-          "FACTURAYA_TEST_RUC must be a 13-digit RUC. Got: " + ruc
+          "FACTURACION_EC_TEST_RUC must be a 13-digit RUC. Got: " + ruc
         );
       }
     });
 
     it("should authorize a factura in ambiente PRUEBAS", async () => {
-      const fy = new FacturaYa({
+      const fy = new FacturacionElectronicaEC({
         emisor: {
           ruc,
           razonSocial: "EMPRESA DE PRUEBA INTEGRACION",
