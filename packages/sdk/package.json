@@ -1,6 +1,6 @@
 {
   "name": "facturacion-electronica-ec",
-  "version": "0.1.0-beta.1",
+  "version": "0.1.0-beta.2",
   "description": "Libreria TypeScript para emision de comprobantes electronicos del SRI Ecuador. Soporta factura, liquidacion de compra, nota de credito, nota de debito, guia de remision y comprobante de retencion.",
   "license": "MIT",
   "type": "module",
@@ -19,7 +19,7 @@
       }
     }
   },
-  "files": ["dist", "xsd"],
+  "files": ["dist", "xsd", "README.md"],
   "engines": {
     "node": ">=18.0.0"
   },
@@ -49,7 +49,7 @@
     "url": "https://github.com/cuymo/facturacion-electronica-ec/issues"
   },
   "scripts": {
-    "build": "tsup && node -e \"const{cpSync,mkdirSync}=require('fs');mkdirSync('./xsd',{recursive:true});cpSync('../../vendor/sri/xsd','./xsd',{recursive:true,filter:(s)=>s.endsWith('.xsd')||!s.includes('.')})\"",
+    "build": "tsup && node -e \"const{cpSync,mkdirSync}=require('fs');mkdirSync('./xsd',{recursive:true});cpSync('../../vendor/sri/xsd','./xsd',{recursive:true,filter:(s)=>s.endsWith('.xsd')||!s.includes('.')});cpSync('../../README.md','./README.md')\"",
     "typecheck": "tsc --noEmit",
     "clean": "rimraf dist",
     "test": "vitest run"
