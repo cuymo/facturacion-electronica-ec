@@ -37,6 +37,9 @@ import type { FacturacionElectronicaECConfig } from "./config.js";
 import type { EmissionResult } from "./emission-result.js";
 import { runEmissionPipeline } from "./pipeline/emission-pipeline.js";
 
+type DocumentValidator<T extends DocumentData> = (data: T) => ValidationResult;
+const ERROR_NOTIFIED = Symbol.for("facturacion-electronica-ec.errorNotified");
+
 export class FacturacionElectronicaEC {
   private readonly config: Required<
     Pick<
@@ -57,11 +60,62 @@ export class FacturacionElectronicaEC {
   private readonly sriClient: ISriClient;
 
   constructor(config: FacturacionElectronicaECConfig) {
+    if (!config || typeof config !== "object") {
+      throw FacturacionElectronicaECError.configuration(
+        "La configuracion es obligatoria."
+      );
+    }
+
+    if (!config.emisor || typeof config.emisor !== "object") {
+      throw FacturacionElectronicaECError.configuration(
+        "emisor es obligatorio."
+      );
+    }
+
     if (!config.sequenceProvider) {
       throw FacturacionElectronicaECError.configuration(
         "sequenceProvider es obligatorio. Use UnsafeMemorySequenceProvider solo para tests."
       );
     }
+
+    if (typeof config.sequenceProvider.next !== "function") {
+      throw FacturacionElectronicaECError.configuration(
+        "sequenceProvider.next debe ser una funcion."
+      );
+    }
+
+    if (
+      config.sequenceProvider.rollback !== undefined &&
+      typeof config.sequenceProvider.rollback !== "function"
+    ) {
+      throw FacturacionElectronicaECError.configuration(
+        "sequenceProvider.rollback debe ser una funcion si se define."
+      );
+    }
+
+    if (config.signer && typeof config.signer.sign !== "function") {
+      throw FacturacionElectronicaECError.configuration(
+        "signer.sign debe ser una funcion."
+      );
+    }
+
+    if (
+      config.sriClient &&
+      (typeof config.sriClient.enviarComprobante !== "function" ||
+        typeof config.sriClient.autorizarComprobante !== "function")
+    ) {
+      throw FacturacionElectronicaECError.configuration(
+        "sriClient debe implementar enviarComprobante y autorizarComprobante."
+      );
+    }
+
+    this.assertNonNegativeInteger(
+      "authorizationDelayMs",
+      config.authorizationDelayMs
+    );
+    this.assertNonNegativeInteger("maxError70Retries", config.maxError70Retries);
+    this.assertNonNegativeInteger("maxSendRetries", config.maxSendRetries);
+    this.assertNonNegativeInteger("sendRetryDelayMs", config.sendRetryDelayMs);
 
     this.config = {
       ...config,
@@ -79,35 +133,33 @@ export class FacturacionElectronicaEC {
   // ==================== High-level emission methods ====================
 
   async emitirFactura(data: FacturaData): Promise<EmissionResult> {
-    this.assertValid(validateFactura(data));
-    return this.emit("FACTURA", data);
+    return this.emitValidated("FACTURA", data, validateFactura);
   }
 
   async emitirLiquidacionCompra(
     data: LiquidacionCompraData
   ): Promise<EmissionResult> {
-    this.assertValid(validateLiquidacionCompra(data));
-    return this.emit("LIQUIDACION_COMPRA", data);
+    return this.emitValidated(
+      "LIQUIDACION_COMPRA",
+      data,
+      validateLiquidacionCompra
+    );
   }
 
   async emitirNotaCredito(data: NotaCreditoData): Promise<EmissionResult> {
-    this.assertValid(validateNotaCredito(data));
-    return this.emit("NOTA_CREDITO", data);
+    return this.emitValidated("NOTA_CREDITO", data, validateNotaCredito);
   }
 
   async emitirNotaDebito(data: NotaDebitoData): Promise<EmissionResult> {
-    this.assertValid(validateNotaDebito(data));
-    return this.emit("NOTA_DEBITO", data);
+    return this.emitValidated("NOTA_DEBITO", data, validateNotaDebito);
   }
 
   async emitirGuiaRemision(data: GuiaRemisionData): Promise<EmissionResult> {
-    this.assertValid(validateGuiaRemision(data));
-    return this.emit("GUIA_REMISION", data);
+    return this.emitValidated("GUIA_REMISION", data, validateGuiaRemision);
   }
 
   async emitirRetencion(data: RetencionData): Promise<EmissionResult> {
-    this.assertValid(validateRetencion(data));
-    return this.emit("COMPROBANTE_RETENCION", data);
+    return this.emitValidated("COMPROBANTE_RETENCION", data, validateRetencion);
   }
 
   // ==================== Low-level access ====================
@@ -121,29 +173,40 @@ export class FacturacionElectronicaEC {
     data: DocumentData,
     options?: { secuencial?: string; claveAcceso?: string }
   ): string {
-    const schema = schemaRegistry.get(documentType);
-    const secuencial = options?.secuencial ?? "000000000";
-    const claveAcceso = options?.claveAcceso ?? "0".repeat(49);
+    try {
+      this.assertDocumentData(data);
 
-    const ctx: XmlBuildContext = {
-      ambiente: this.config.emisor.ambiente,
-      ruc: this.config.emisor.ruc,
-      razonSocial: this.config.emisor.razonSocial,
-      nombreComercial: this.config.emisor.nombreComercial ?? null,
-      dirMatriz: this.config.emisor.dirMatriz,
-      claveAcceso,
-      codDoc: schema.codDoc,
-      establecimiento: this.config.emisor.establecimiento,
-      puntoEmision: this.config.emisor.puntoEmision,
-      secuencial,
-      direccionEstablecimiento:
-        this.config.emisor.direccionEstablecimiento,
-      contribuyenteEspecial:
-        this.config.emisor.contribuyenteEspecial ?? null,
-      obligadoContabilidad: this.config.emisor.obligadoContabilidad,
-    };
+      const schema = schemaRegistry.get(documentType);
+      const secuencial = options?.secuencial ?? "000000000";
+      const claveAcceso = options?.claveAcceso ?? "0".repeat(49);
 
-    return buildDocumentXml(documentType, ctx, data);
+      const ctx: XmlBuildContext = {
+        ambiente: this.config.emisor.ambiente,
+        ruc: this.config.emisor.ruc,
+        razonSocial: this.config.emisor.razonSocial,
+        nombreComercial: this.config.emisor.nombreComercial ?? null,
+        dirMatriz: this.config.emisor.dirMatriz,
+        claveAcceso,
+        codDoc: schema.codDoc,
+        establecimiento: this.config.emisor.establecimiento,
+        puntoEmision: this.config.emisor.puntoEmision,
+        secuencial,
+        direccionEstablecimiento:
+          this.config.emisor.direccionEstablecimiento,
+        contribuyenteEspecial:
+          this.config.emisor.contribuyenteEspecial ?? null,
+        obligadoContabilidad: this.config.emisor.obligadoContabilidad,
+      };
+
+      return buildDocumentXml(documentType, ctx, data);
+    } catch (error) {
+      throw this.handleSyncError(error, (e) =>
+        FacturacionElectronicaECError.xmlBuild(
+          `Error construyendo XML: ${this.errorMessage(e)}`,
+          { cause: e instanceof Error ? e : undefined }
+        )
+      );
+    }
   }
 
   /**
@@ -151,20 +214,38 @@ export class FacturacionElectronicaEC {
    * Does not send or interact with SRI.
    */
   async signXml(xml: string, documentType: DocumentType): Promise<string> {
-    return this.signer.sign(xml, documentType, {
-      p12: this.config.p12,
-      p12Password: this.config.p12Password,
-    });
+    try {
+      return await this.signer.sign(xml, documentType, {
+        p12: this.config.p12,
+        p12Password: this.config.p12Password,
+      });
+    } catch (error) {
+      throw await this.handleAsyncError(error, (e) =>
+        FacturacionElectronicaECError.signing(
+          `Error al firmar XML: ${this.errorMessage(e)}`,
+          { cause: e instanceof Error ? e : undefined }
+        )
+      );
+    }
   }
 
   /**
    * Send a signed XML to SRI reception. Single attempt, no retry.
    */
   async sendToSri(signedXml: string): Promise<SriRecepcionResult> {
-    return this.sriClient.enviarComprobante(
-      signedXml,
-      this.config.emisor.ambiente
-    );
+    try {
+      return await this.sriClient.enviarComprobante(
+        signedXml,
+        this.config.emisor.ambiente
+      );
+    } catch (error) {
+      throw await this.handleAsyncError(error, (e) =>
+        FacturacionElectronicaECError.sriCommunication(
+          `Error enviando comprobante al SRI: ${this.errorMessage(e)}`,
+          { cause: e instanceof Error ? e : undefined }
+        )
+      );
+    }
   }
 
   /**
@@ -173,10 +254,19 @@ export class FacturacionElectronicaEC {
   async checkAuthorization(
     claveAcceso: string
   ): Promise<SriAutorizacionResult> {
-    return this.sriClient.autorizarComprobante(
-      claveAcceso,
-      this.config.emisor.ambiente
-    );
+    try {
+      return await this.sriClient.autorizarComprobante(
+        claveAcceso,
+        this.config.emisor.ambiente
+      );
+    } catch (error) {
+      throw await this.handleAsyncError(error, (e) =>
+        FacturacionElectronicaECError.sriCommunication(
+          `Error consultando autorizacion en SRI: ${this.errorMessage(e)}`,
+          { cause: e instanceof Error ? e : undefined }
+        )
+      );
+    }
   }
 
   // ==================== Catalog management ====================
@@ -189,7 +279,16 @@ export class FacturacionElectronicaEC {
     name: string,
     entries: Record<string, CatalogEntry>
   ): void {
-    catalogRegistry.override(name, entries);
+    try {
+      catalogRegistry.override(name, entries);
+    } catch (error) {
+      throw this.handleSyncError(error, (e) =>
+        FacturacionElectronicaECError.configuration(
+          `Error actualizando catalogo "${name}": ${this.errorMessage(e)}`,
+          { cause: e instanceof Error ? e : undefined }
+        )
+      );
+    }
   }
 
   // ==================== Private ====================
@@ -217,6 +316,35 @@ export class FacturacionElectronicaEC {
     });
   }
 
+  private async emitValidated<T extends DocumentData>(
+    documentType: DocumentType,
+    data: T,
+    validate: DocumentValidator<T>
+  ): Promise<EmissionResult> {
+    try {
+      this.assertDocumentData(data);
+      this.assertValid(validate(data));
+    } catch (error) {
+      throw await this.handleAsyncError(error, (e) =>
+        FacturacionElectronicaECError.validation(
+          `Datos invalidos para ${documentType}: ${this.errorMessage(e)}`,
+          { cause: e instanceof Error ? e : undefined }
+        )
+      );
+    }
+
+    try {
+      return await this.emit(documentType, data);
+    } catch (error) {
+      throw await this.handleAsyncError(error, (e) =>
+        FacturacionElectronicaECError.xmlBuild(
+          `Error emitiendo ${documentType}: ${this.errorMessage(e)}`,
+          { cause: e instanceof Error ? e : undefined }
+        )
+      );
+    }
+  }
+
   private assertValid(result: ValidationResult): void {
     if (!result.valid) {
       const messages = result.errors
@@ -224,5 +352,73 @@ export class FacturacionElectronicaEC {
         .join("; ");
       throw FacturacionElectronicaECError.validation(messages);
     }
+  }
+
+  private assertDocumentData(data: unknown): asserts data is DocumentData {
+    if (!data || typeof data !== "object" || Array.isArray(data)) {
+      throw FacturacionElectronicaECError.validation(
+        "Los datos del documento deben ser un objeto."
+      );
+    }
+  }
+
+  private assertNonNegativeInteger(field: string, value: unknown): void {
+    if (value === undefined) return;
+    if (
+      typeof value !== "number" ||
+      !Number.isInteger(value) ||
+      value < 0
+    ) {
+      throw FacturacionElectronicaECError.configuration(
+        `${field} debe ser un entero mayor o igual a 0.`
+      );
+    }
+  }
+
+  private handleSyncError(
+    error: unknown,
+    fallback: (error: unknown) => FacturacionElectronicaECError
+  ): FacturacionElectronicaECError {
+    const typed =
+      error instanceof FacturacionElectronicaECError ? error : fallback(error);
+    void this.notifyError(typed);
+    return typed;
+  }
+
+  private async handleAsyncError(
+    error: unknown,
+    fallback: (error: unknown) => FacturacionElectronicaECError
+  ): Promise<FacturacionElectronicaECError> {
+    const typed =
+      error instanceof FacturacionElectronicaECError ? error : fallback(error);
+    await this.notifyError(typed);
+    return typed;
+  }
+
+  private async notifyError(
+    error: FacturacionElectronicaECError
+  ): Promise<void> {
+    const record = error as FacturacionElectronicaECError & {
+      [ERROR_NOTIFIED]?: true;
+    };
+    if (record[ERROR_NOTIFIED]) return;
+    Object.defineProperty(record, ERROR_NOTIFIED, {
+      value: true,
+      enumerable: false,
+      configurable: true,
+    });
+
+    if (!this.config.hooks?.onError) return;
+    try {
+      await this.config.hooks.onError(error);
+    } catch (hookError) {
+      this.config.logger?.warn("[SDK] onError hook error", {
+        error: this.errorMessage(hookError),
+      });
+    }
+  }
+
+  private errorMessage(error: unknown): string {
+    return error instanceof Error ? error.message : String(error);
   }
 }

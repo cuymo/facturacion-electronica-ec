@@ -1,6 +1,6 @@
 # facturacion-electronica-ec
 
-> **v0.1.0-beta.1** — Libreria TypeScript para emision de comprobantes electronicos del SRI Ecuador. **6/6 documentos AUTORIZADOS** end-to-end contra SRI PRUEBAS. API inestable hasta v1.0.
+> **v1.0.0** — Libreria TypeScript estable para emision de comprobantes electronicos del SRI Ecuador. **6/6 documentos AUTORIZADOS** end-to-end contra SRI PRUEBAS.
 
 [![npm](https://img.shields.io/npm/v/facturacion-electronica-ec.svg)](https://www.npmjs.com/package/facturacion-electronica-ec)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

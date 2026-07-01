@@ -1,5 +1,36 @@
 # Changelog
 
+## 1.0.0 (2026-07-01)
+
+First stable release of `facturacion-electronica-ec`.
+
+### Stable API baseline
+
+- Publishes the SDK as `facturacion-electronica-ec@1.0.0`.
+- Requires Node.js `>=24.18.0` and pnpm `11.9.0` for repository development.
+- Keeps the public high-level API centered on `FacturacionElectronicaEC`.
+- Keeps `sequenceProvider` mandatory for production-safe sequential numbering.
+
+### Reliability hardening
+
+- Normalizes SDK failures to `FacturacionElectronicaECError` where the operation must reject.
+- Returns controlled partial states for SRI communication outcomes where appropriate.
+- Executes `hooks.onError` for validation, sequence, XML build, XSD, signing, SRI communication, authorization query, and rollback failures.
+- Adds regression coverage for runtime-invalid inputs, sequence crashes, XML builder crashes, signer failures, SRI communication failures, and rollback failures.
+
+### Tooling and dependencies
+
+- Updates the workspace to pnpm 11 and current dependency versions.
+- Aligns Node types to Node 24 LTS.
+- Fixes the root `lint` script so release checks do not fail when package-level lint scripts are absent.
+
+### Validation
+
+- `pnpm lint`
+- `pnpm typecheck`
+- `pnpm test`
+- `pnpm build`
+
 ## 0.1.0-beta.1 (2026-04-13)
 
 First public beta of `facturacion-electronica-ec`.

@@ -28,6 +28,8 @@ import type { ISequenceProvider } from "../sequence/sequence-provider.js";
 import type { EmissionResult, EmissionEstado } from "../emission-result.js";
 import type { EmissionHooks } from "../hooks.js";
 
+const ERROR_NOTIFIED = Symbol.for("facturacion-electronica-ec.errorNotified");
+
 export interface PipelineParams {
   emisor: Emisor;
   documentType: DocumentType;
@@ -65,6 +67,28 @@ async function callHook<T>(
   }
 }
 
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
+async function notifyError(
+  hooks: EmissionHooks | undefined,
+  error: FacturacionElectronicaECError,
+  logger?: Logger
+): Promise<void> {
+  const record = error as FacturacionElectronicaECError & {
+    [ERROR_NOTIFIED]?: true;
+  };
+  if (record[ERROR_NOTIFIED]) return;
+  Object.defineProperty(record, ERROR_NOTIFIED, {
+    value: true,
+    enumerable: false,
+    configurable: true,
+  });
+
+  await callHook(hooks?.onError, error, logger);
+}
+
 export async function runEmissionPipeline(
   params: PipelineParams
 ): Promise<EmissionResult> {
@@ -84,7 +108,18 @@ export async function runEmissionPipeline(
     sendRetryDelayMs,
   } = params;
 
-  const schema = schemaRegistry.get(documentType);
+  let schema: ReturnType<typeof schemaRegistry.get>;
+  try {
+    schema = schemaRegistry.get(documentType);
+  } catch (error) {
+    const typed = FacturacionElectronicaECError.configuration(
+      `No existe esquema registrado para ${documentType}: ${errorMessage(error)}`,
+      { cause: error instanceof Error ? error : undefined }
+    );
+    await notifyError(hooks, typed, logger);
+    throw typed;
+  }
+
   const signOptions: SignOptions = { p12: params.p12, p12Password: params.p12Password };
 
   let secuencial = "";
@@ -106,11 +141,20 @@ export async function runEmissionPipeline(
     attempts = error70Attempt + 1;
 
     // 1. Get next sequence
-    secuencial = await sequenceProvider.next(
-      emisor.establecimiento,
-      emisor.puntoEmision,
-      documentType
-    );
+    try {
+      secuencial = await sequenceProvider.next(
+        emisor.establecimiento,
+        emisor.puntoEmision,
+        documentType
+      );
+    } catch (error) {
+      const typed = FacturacionElectronicaECError.sequence(
+        `Error obteniendo secuencial para ${documentType}: ${errorMessage(error)}`,
+        { cause: error instanceof Error ? error : undefined }
+      );
+      await notifyError(hooks, typed, logger);
+      throw typed;
+    }
 
     // 2. Generate clave de acceso
     const codigoNumerico = generateCodigoNumerico();
@@ -118,17 +162,26 @@ export async function runEmissionPipeline(
     // Extract fechaEmision from data (all doc types have it, but field name varies)
     const fechaEmision = extractFechaEmision(documentType, data);
 
-    claveAcceso = generateClaveAcceso({
-      fechaEmision,
-      tipoComprobante: schema.codDoc,
-      ruc: emisor.ruc,
-      ambiente: emisor.ambiente,
-      establecimiento: emisor.establecimiento,
-      puntoEmision: emisor.puntoEmision,
-      secuencial,
-      codigoNumerico,
-      tipoEmision: "1",
-    });
+    try {
+      claveAcceso = generateClaveAcceso({
+        fechaEmision,
+        tipoComprobante: schema.codDoc,
+        ruc: emisor.ruc,
+        ambiente: emisor.ambiente,
+        establecimiento: emisor.establecimiento,
+        puntoEmision: emisor.puntoEmision,
+        secuencial,
+        codigoNumerico,
+        tipoEmision: "1",
+      });
+    } catch (error) {
+      const typed = FacturacionElectronicaECError.claveAcceso(
+        `Error generando clave de acceso para ${documentType}: ${errorMessage(error)}`,
+        { cause: error instanceof Error ? error : undefined }
+      );
+      await notifyError(hooks, typed, logger);
+      throw typed;
+    }
 
     // 3. Build XML
     const ctx: XmlBuildContext = {
@@ -147,7 +200,16 @@ export async function runEmissionPipeline(
       obligadoContabilidad: emisor.obligadoContabilidad,
     };
 
-    xmlOriginal = buildDocumentXml(documentType, ctx, data);
+    try {
+      xmlOriginal = buildDocumentXml(documentType, ctx, data);
+    } catch (error) {
+      const typed = FacturacionElectronicaECError.xmlBuild(
+        `Error construyendo XML para ${documentType}: ${errorMessage(error)}`,
+        { cause: error instanceof Error ? error : undefined }
+      );
+      await notifyError(hooks, typed, logger);
+      throw typed;
+    }
     await callHook(hooks?.onXmlBuilt, xmlOriginal, logger);
 
     logger?.info(`[Pipeline] XML generado para ${documentType}`, {
@@ -157,15 +219,39 @@ export async function runEmissionPipeline(
     });
 
     // 4. Validate XML structure (basic checks always run)
-    validateXmlStructure(xmlOriginal, claveAcceso, schema.rootTag);
+    try {
+      validateXmlStructure(xmlOriginal, claveAcceso, schema.rootTag);
+    } catch (error) {
+      const typed =
+        error instanceof FacturacionElectronicaECError
+          ? error
+          : FacturacionElectronicaECError.xmlStructure(
+              `XML invalido para ${documentType}: ${errorMessage(error)}`,
+              { cause: error instanceof Error ? error : undefined }
+            );
+      await notifyError(hooks, typed, logger);
+      throw typed;
+    }
 
     // 4b. XSD validation (optional, requires xmllint-wasm)
     if (validateXsd) {
-      const xsdResult = await validateXmlAgainstXsd(documentType, xmlOriginal);
-      if (!xsdResult.valid) {
-        throw FacturacionElectronicaECError.xmlStructure(
-          `XSD validation failed for ${documentType}: ${xsdResult.errors.join("; ")}`
-        );
+      try {
+        const xsdResult = await validateXmlAgainstXsd(documentType, xmlOriginal);
+        if (!xsdResult.valid) {
+          throw FacturacionElectronicaECError.xmlStructure(
+            `XSD validation failed for ${documentType}: ${xsdResult.errors.join("; ")}`
+          );
+        }
+      } catch (error) {
+        const typed =
+          error instanceof FacturacionElectronicaECError
+            ? error
+            : FacturacionElectronicaECError.xmlStructure(
+                `Error validando XSD para ${documentType}: ${errorMessage(error)}`,
+                { cause: error instanceof Error ? error : undefined }
+              );
+        await notifyError(hooks, typed, logger);
+        throw typed;
       }
       logger?.info(`[Pipeline] XSD validation passed for ${documentType}`);
     }
@@ -174,10 +260,12 @@ export async function runEmissionPipeline(
     try {
       xmlFirmado = await signer.sign(xmlOriginal, documentType, signOptions);
     } catch (error) {
-      throw FacturacionElectronicaECError.signing(
+      const typed = FacturacionElectronicaECError.signing(
         `Error al firmar XML: ${error instanceof Error ? error.message : String(error)}`,
         { cause: error instanceof Error ? error : undefined }
       );
+      await notifyError(hooks, typed, logger);
+      throw typed;
     }
     await callHook(hooks?.onXmlSigned, xmlFirmado, logger);
 
@@ -216,6 +304,14 @@ export async function runEmissionPipeline(
             tipo: "ERROR",
           },
         ];
+        await notifyError(
+          hooks,
+          FacturacionElectronicaECError.sriCommunication(
+            mensajes[0]!.mensaje,
+            { cause: error instanceof Error ? error : undefined }
+          ),
+          logger
+        );
         return buildResult();
       }
     }
@@ -279,6 +375,14 @@ export async function runEmissionPipeline(
             tipo: "WARNING",
           },
         ];
+        await notifyError(
+          hooks,
+          FacturacionElectronicaECError.sriCommunication(
+            mensajes[0]!.mensaje,
+            { cause: error instanceof Error ? error : undefined }
+          ),
+          logger
+        );
       }
       break; // Reception was successful, no Error 70 retry needed
     }
@@ -322,6 +426,14 @@ export async function runEmissionPipeline(
           claveAcceso,
           error: pollError instanceof Error ? pollError.message : String(pollError),
         });
+        await notifyError(
+          hooks,
+          FacturacionElectronicaECError.sriCommunication(
+            `Error consultando autorizacion tras Error 70: ${errorMessage(pollError)}`,
+            { cause: pollError instanceof Error ? pollError : undefined }
+          ),
+          logger
+        );
       }
 
       // Not authorized -- retry with new sequence if attempts remain
@@ -346,15 +458,37 @@ export async function runEmissionPipeline(
     } else {
       // DEVUELTO but not Error 70 -- rollback sequence and stop
       if (sequenceProvider.rollback) {
-        await sequenceProvider.rollback(
-          emisor.establecimiento,
-          emisor.puntoEmision,
-          documentType
-        );
-        logger?.info("[Pipeline] Secuencial liberado por DEVUELTO", {
-          claveAcceso,
-          secuencial,
-        });
+        try {
+          await sequenceProvider.rollback(
+            emisor.establecimiento,
+            emisor.puntoEmision,
+            documentType
+          );
+          logger?.info("[Pipeline] Secuencial liberado por DEVUELTO", {
+            claveAcceso,
+            secuencial,
+          });
+        } catch (error) {
+          const typed = FacturacionElectronicaECError.sequence(
+            `SRI devolvio el comprobante pero fallo el rollback del secuencial: ${errorMessage(error)}`,
+            { cause: error instanceof Error ? error : undefined }
+          );
+          mensajes = [
+            ...mensajes,
+            {
+              identificador: "",
+              mensaje: typed.message,
+              informacionAdicional: "",
+              tipo: "WARNING",
+            },
+          ];
+          logger?.error("[Pipeline] Error liberando secuencial", {
+            claveAcceso,
+            secuencial,
+            error: errorMessage(error),
+          });
+          await notifyError(hooks, typed, logger);
+        }
       }
       break;
     }
