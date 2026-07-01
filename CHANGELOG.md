@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.1 (2026-07-01)
+
+- Updates README requirements to Node.js `>=24.18.0`.
+- Aligns CI with Node.js 24.18.0 and pnpm 11.9.0.
+- Normalizes package repository URLs for npm publish metadata.
+
 ## 1.0.0 (2026-07-01)
 
 First stable release of `facturacion-electronica-ec`.

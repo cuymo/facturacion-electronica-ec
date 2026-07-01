@@ -11,20 +11,16 @@ jobs:
     name: Typecheck / Test / Build / Pack
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [18, 20, 22]
-
     steps:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 11.9.0
 
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 24.18.0
           cache: pnpm
 
       - name: Install dependencies
@@ -71,7 +67,3 @@ jobs:
 
       - name: Verify tarballs exist
         run: ls -la .tmp-packs/*.tgz
-
-  # Integration tests are NOT part of CI.
-  # They require a .p12 certificate and SRI PRUEBAS access.
-  # Run manually with: FACTURACION_EC_TEST_RUN_INTEGRATION=true node tests/sdk/run-integration.mjs

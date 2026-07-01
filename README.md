@@ -1,6 +1,6 @@
 # facturacion-electronica-ec
 
-> **v1.0.0** — Libreria TypeScript estable para emision de comprobantes electronicos del SRI Ecuador. **6/6 documentos AUTORIZADOS** end-to-end contra SRI PRUEBAS.
+> **v1.0.1** — Libreria TypeScript estable para emision de comprobantes electronicos del SRI Ecuador. **6/6 documentos AUTORIZADOS** end-to-end contra SRI PRUEBAS.
 
 [![npm](https://img.shields.io/npm/v/facturacion-electronica-ec.svg)](https://www.npmjs.com/package/facturacion-electronica-ec)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -85,7 +85,7 @@ npm install facturacion-electronica-ec ec-sri-invoice-signer
 npm install xmllint-wasm
 ```
 
-**Requisitos**: Node.js >= 18
+**Requisitos**: Node.js >= 24.18.0
 
 ---
 
@@ -1108,8 +1108,8 @@ new FacturacionElectronicaEC({
 git clone https://github.com/cuymo/facturacion-electronica-ec.git
 cd facturacion-electronica-ec
 pnpm install
-pnpm -r build
-npx vitest run     # 98 unit tests
+pnpm build
+pnpm test
 ```
 
 ### Integration tests (requiere .p12 de pruebas)

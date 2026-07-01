@@ -1,6 +1,6 @@
 {
   "name": "facturacion-electronica-ec",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Libreria TypeScript para emision de comprobantes electronicos del SRI Ecuador. Soporta factura, liquidacion de compra, nota de credito, nota de debito, guia de remision y comprobante de retencion.",
   "license": "MIT",
   "type": "module",
@@ -41,7 +41,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/cuymo/facturacion-electronica-ec.git",
+    "url": "git+https://github.com/cuymo/facturacion-electronica-ec.git",
     "directory": "packages/sdk"
   },
   "homepage": "https://github.com/cuymo/facturacion-electronica-ec#readme",
